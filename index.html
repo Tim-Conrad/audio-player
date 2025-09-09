@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#111827" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>AudioPlayer</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <link rel="modulepreload" href="/app.js" />
+  </head>
+  <body>
+    <header class="app-header">
+      <button id="back-btn" class="icon hide" aria-label="Home" title="Home">
+        <span class="material-symbols-rounded">home</span>
+      </button>
+      <h1>AudioPlayer</h1>
+      <button id="sleep-btn" class="icon" aria-label="Sleep timer" title="Sleep timer">
+        <span id="sleep-remaining" class="sleep-remaining" aria-live="polite" title="Time until sleep" style="display:none;">0:00</span>
+        <span class="material-symbols-rounded">bedtime</span>
+      </button>
+      <button id="settings-btn" class="icon" aria-label="Settings" title="Settings">
+        <span class="material-symbols-rounded">settings</span>
+      </button>
+    </header>
+
+    <main class="app-main">
+      <section id="home-section" class="home">
+        <h2 style="margin:0 0 8px; font-size:16px; color: var(--muted);">Playlists</h2>
+        <ul id="playlist-grid" class="playlist-grid" role="list"></ul>
+      </section>
+      <section class="controls">
+        <div class="player">
+          <div class="artwork-wrap">
+            <div class="artwork-glow"></div>
+            <div class="artwork">
+              <img id="artwork-img" alt="Artwork" />
+            </div>
+          </div>
+
+          <div class="title-area">
+            <div class="track-title" id="now-title">—</div>
+          </div>
+
+          <div class="progress">
+            <span id="current-time">0:00</span>
+            <input id="seek" type="range" min="0" max="100" value="0" step="0.1" />
+            <span id="duration">0:00</span>
+          </div>
+
+          <div class="transport">
+            <button id="loop-btn" type="button" aria-label="Loop" title="Loop playlist"><span class="material-symbols-rounded">repeat</span></button>
+            <button id="prev-btn" type="button" aria-label="Previous"><span class="material-symbols-rounded">skip_previous</span></button>
+            <button id="playpause-btn" class="primary" type="button" aria-label="Play/Pause"><span class="material-symbols-rounded">play_arrow</span></button>
+            <button id="next-btn" type="button" aria-label="Next"><span class="material-symbols-rounded">skip_next</span></button>
+            <button id="shuffle-btn" type="button" aria-label="Shuffle" title="Shuffle"><span class="material-symbols-rounded">shuffle</span></button>
+          </div>
+
+          <audio id="audio" preload="metadata" crossorigin="anonymous"></audio>
+        </div>
+      </section>
+
+      <section class="playlist">
+        <h2 id="playlist-title">My playlist</h2>
+        <ul id="tracks" class="tracks" role="list"></ul>
+      </section>
+    </main>
+
+    <div id="settings-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <button id="settings-close" class="icon" aria-label="Close settings">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+          <h2>Settings</h2>
+          <span class="spacer"></span>
+        </div>
+        <div class="modal-body">
+          <div class="playlist-loader">
+            <label for="playlist-input">Playlist folder (path or URL):</label>
+            <div class="row">
+              <input id="playlist-input" type="text" placeholder="/music/" spellcheck="false" />
+              <button id="load-btn" type="button">Save</button>
+            </div>
+            <div class="row options">
+              <label class="checkbox">
+                <input id="autoplay-input" type="checkbox" /> Autoplay
+              </label>
+            </div>
+            <div id="status" class="status" aria-live="polite"></div>
+          </div>
+
+          <div class="row" style="margin-top:12px; gap:12px;">
+            <button id="install-btn" type="button" class="primary" title="Install this app" disabled>
+              <span class="material-symbols-rounded">download</span>
+              <span>Install app</span>
+            </button>
+            <button id="reset-btn" type="button" class="danger" title="Reset settings to defaults">
+              <span class="material-symbols-rounded">restart_alt</span>
+              <span>Reset defaults</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+
+    
+    <div id="sleep-modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+      <div class="modal-panel">
+        <div class="modal-header">
+          <button id="sleep-close" class="icon" aria-label="Close sleep timer">
+            <span class="material-symbols-rounded">close</span>
+          </button>
+          <h2>Sleep timer</h2>
+          <span class="spacer"></span>
+        </div>
+        <div class="modal-body">
+          <div class="sleep-wrap">
+            <div class="sleep-dial">
+              <svg id="sleep-gauge" viewBox="0 0 100 100" width="260" height="260" aria-hidden="true">
+                <defs>
+                  <linearGradient id="sleepGrad" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#22c55e"/>
+                    <stop offset="100%" stop-color="#facc15"/>
+                  </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="42" stroke="#1f2937" stroke-width="6" fill="none"></circle>
+                <g transform="rotate(-90 50 50)">
+                  <circle id="sleep-progress" cx="50" cy="50" r="42" stroke="url(#sleepGrad)" stroke-width="6" stroke-linecap="round" fill="none" stroke-dasharray="264" stroke-dashoffset="264"></circle>
+                </g>
+                <circle id="sleep-knob" cx="50" cy="8" r="4.5" fill="#facc15" stroke="#0b1220" stroke-width="1"></circle>
+              </svg>
+              <div class="sleep-value"><span id="sleep-minutes">30</span><span class="unit">MINUTES</span></div>
+            </div>
+            <div class="row" style="justify-content:center; gap:12px; margin-top:8px;">
+              <button id="sleep-start" class="primary" type="button"><span class="material-symbols-rounded">schedule</span><span>Start</span></button>
+              <button id="sleep-cancel" type="button"><span class="material-symbols-rounded">stop</span><span>Cancel</span></button>
+            </div>
+            <div class="row" style="justify-content:center; gap:8px; margin-top:6px;">
+              <button class="sleep-preset" data-min="10" type="button">10</button>
+              <button class="sleep-preset" data-min="20" type="button">20</button>
+              <button class="sleep-preset" data-min="30" type="button">30</button>
+              <button class="sleep-preset" data-min="40" type="button">40</button>
+              <button class="sleep-preset" data-min="60" type="button">60</button>
+            </div>
+            <div id="sleep-status" class="status" aria-live="polite" style="text-align:center; margin-top:6px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+    <script>
+      (function(){
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/sw.js').catch(() => {});
+        }
+      })();
+    </script>
+  </body>
+  </html>
+
+
